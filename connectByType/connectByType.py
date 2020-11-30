@@ -6,16 +6,14 @@ This script is created to make life easier for ppl riggers that do a lot of conn
 Its designed to be easiely extended to encompas more node simply adding more node to the typeDict dictionary
 in form of: {NODETYPE: (INPUTPLUG, OUTPUTPLUG)}
 """
+import sys
+if not "C:/tools/mayaTools" in sys.path:
+    sys.path.append("C:/tools/mayaTools")
 
 import maya.api.OpenMaya as om2
+from connectByType.constants import CONSTANTS as CONST
+
 dgMod = om2.MDGModifier()
-
-typeDict = {
-    "decomposeMatrix": ("inputMatrix", ["outputRotate", "outputTranslate", "outputScale"]),
-    "transform": (["rotate", "translate", "scale"], "worldMatrix"),
-    "multMatrix": ("matrixIn", "matrixSum"),
-    "inverseMatrix": ("inputMatrix", "outputMatrix")}
-
 
 def getInputOutput(srcMobj, trgMobj):
     """
@@ -30,8 +28,8 @@ def getInputOutput(srcMobj, trgMobj):
     srcType = srcMFn.typeName
     trgType = trgMFn.typeName
 
-    srcInputPlugs, srcOutputPlugs = typeDict[srcType]
-    trgInputPlugs, trgOutputPlugs = typeDict[trgType]
+    srcInputPlugs, srcOutputPlugs = CONST.typeDict[srcType]
+    trgInputPlugs, trgOutputPlugs = CONST.typeDict[trgType]
     ioPlugsList = [srcInputPlugs, srcOutputPlugs, trgInputPlugs, trgOutputPlugs]
 
     return tuple(ioPlugsList)
@@ -102,6 +100,7 @@ srcType = srcMFn.typeName
 
 for mobj in mobjs[1:]:
     trgMobjHandle = om2.MObjectHandle(mobj)
+    print(srcType)
     if srcType == "decomposeMatrix":
         connectSRT(srcMobjHandle, trgMobjHandle)
     else:
