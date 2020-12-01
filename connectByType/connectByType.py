@@ -12,6 +12,7 @@ if not "C:/tools/mayaTools" in sys.path:
 
 import maya.api.OpenMaya as om2
 from connectByType.constants import CONSTANTS as CONST
+reload(CONST)
 
 dgMod = om2.MDGModifier()
 
@@ -32,6 +33,7 @@ def getInputOutput(srcMobj, trgMobj):
     trgInputPlugs, trgOutputPlugs = CONST.typeDict[trgType]
     ioPlugsList = [srcInputPlugs, srcOutputPlugs, trgInputPlugs, trgOutputPlugs]
 
+    print(ioPlugsList)
     return tuple(ioPlugsList)
 
 
@@ -100,7 +102,6 @@ srcType = srcMFn.typeName
 
 for mobj in mobjs[1:]:
     trgMobjHandle = om2.MObjectHandle(mobj)
-    print(srcType)
     if srcType == "decomposeMatrix":
         connectSRT(srcMobjHandle, trgMobjHandle)
     else:
