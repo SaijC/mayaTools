@@ -31,46 +31,33 @@ def getInputOutput(srcMobj, trgMobj):
 
     srcInputPlugs, srcOutputPlugs = CONST.typeDict[srcType]
     trgInputPlugs, trgOutputPlugs = CONST.typeDict[trgType]
-    ioPlugsList = [srcInputPlugs, srcOutputPlugs, trgInputPlugs, trgOutputPlugs]
-    print(ioPlugsList)
+    ioPlugsList = [srcOutputPlugs, trgInputPlugs]
     return tuple(ioPlugsList)
 
+
 def getMPlugs(mFn, mPlugList):
+    """
+    get MPlugs from a list
+    :param mFn: mFn
+    :param mPlugList: list
+    :return: list
+    """
     if type(mPlugList) == list:
+
         returnList = list()
-
         for plug in mPlugList:
-            print(plug)
-            returnList.append(mFn.findPlug(plug, False))
+            mPlug = mFn.findPlug(plug, False)
+            if mPlug.isArray or plug == "worldMatrix":
+                returnList.append(mPlug.elementByLogicalIndex(0))
+            else:
+                returnList.append(mPlug)
         return returnList
+
     elif type(mPlugList) == tuple:
-        returnTuple = tuple()
+        returnTuple = list()
         for inputList in mPlugList:
-            returnTuple += [mFn.findPlug(mPlug, False) for mPlug in inputList]
-        return returnTuple
-def connectSRT(srcMobjHandle, trgMobjHandle):
-    """
-    Connect Scale, Rotate and Translate
-    :param srcMobjHandle: MObjectHandle
-    :param trgMObjHandle: MObjectHandle
-    :return: None
-    """
-    assert srcMobjHandle.isValid() == True, "src MObject not valid"
-    assert trgMobjHandle.isValid() == True, "trg MObject not valid"
-
-    srcMobj = srcMobjHandle.object()
-    trgMobj = trgMobjHandle.object()
-
-    srcMFn = om2.MFnDependencyNode(srcMobj)
-    trgMFn = om2.MFnDependencyNode(trgMobj)
-
-    srcInputPlugs, srcOutputPlugs, trgInputPlugs, trgOutputPlugs = getInputOutput(srcMobj, trgMobj)
-    ioCombinedList = zip(srcOutputPlugs, trgInputPlugs)
-    for outAttr, inAttr in ioCombinedList:
-        srcPlug = srcMFn.findPlug(outAttr, False)
-        trgPlug = trgMFn.findPlug(inAttr, False)
-        dgMod.connect(srcPlug, trgPlug)
-
+            returnTuple.append([mFn.findPlug(mPlug, False) for mPlug in inputList])
+        return tuple(returnTuple)
 
 def connectNodes(srcMobjHandle, trgMobjHandle):
     """
@@ -88,27 +75,13 @@ def connectNodes(srcMobjHandle, trgMobjHandle):
     srcMFn = om2.MFnDependencyNode(srcMobj)
     trgMFn = om2.MFnDependencyNode(trgMobj)
 
-    srcInputPlugList, srcOutputPlugList, trgInputPlugList, trgOutputPlugList = getInputOutput(srcMobj, trgMobj)
-    srcInputPlugs = getMPlugs(srcMFn, srcInputPlugList)
-    srcOutputPlugs = getMPlugs(srcMFn, srcInputPlugList)
+    srcOutputPlugList, trgInputPlugList = getInputOutput(srcMobj, trgMobj)
+    srcOutputPlugs = getMPlugs(srcMFn, srcOutputPlugList)
     trgInputPlugs = getMPlugs(trgMFn, trgInputPlugList)
-    trgOutputPlugs = getMPlugs(trgMFn, trgOutputPlugList)
-    print(srcInputPlugs)
-    # srcPlug = srcMFn.findPlug(srcOutputPlugs, False)
-    # trgPlug = trgMFn.findPlug(trgInputPlugs, False)
 
 
-    # if srcPlug.isArray and not trgMFn.hasAttribute("matrixIn"):
-    #     srcWorldMtxPlug = srcPlug.elementByLogicalIndex(0)
-    #     dgMod.connect(srcWorldMtxPlug, trgPlug)
-    #     print("connecting: {} to {}".format(srcWorldMtxPlug, trgPlug))
-    # elif trgMFn.hasAttribute("matrixIn"):
-    #     srcWorldMtxPlug = srcPlug.elementByLogicalIndex(0)
-    #     trgMtxPlug = trgPlug.elementByLogicalIndex(0)
-    #     dgMod.connect(srcWorldMtxPlug, trgMtxPlug)
-    #     print("connecting: {} to {}".format(srcWorldMtxPlug, trgMtxPlug))
-    # else:
-    #     dgMod.connect(srcPlug, trgPlug)
+    for srcPlug, trgPlug in zip(srcOutputPlugs, trgInputPlugs):
+        dgMod.connect(srcPlug, trgPlug)
 
 
 selList = om2.MGlobal.getActiveSelectionList()
@@ -119,9 +92,5 @@ srcType = srcMFn.typeName
 
 for mobj in mobjs[1:]:
     trgMobjHandle = om2.MObjectHandle(mobj)
-    if srcType == "decomposeMatrix":
-        connectSRT(srcMobjHandle, trgMobjHandle)
-    else:
-        connectNodes(srcMobjHandle, trgMobjHandle)
-
+    connectNodes(srcMobjHandle, trgMobjHandle)
 dgMod.doIt()

@@ -14,6 +14,11 @@ typeDict = {
         ['matrixSum']
     ),
 
+    'addMatrix': (
+        ['matrixIn'],
+        ['matrixSum']
+    ),
+
     'inverseMatrix': (
         ['inputMatrix'],
         ['outputMatrix']
@@ -21,7 +26,7 @@ typeDict = {
 
     'multiplyDivide': (
         (
-            ['input1X', 'input1Y', 'input1Z'], ['input2X', 'input2Y', 'input2Z']
+            ['input1'], ['input2']
         ),
         ['outputX', 'outputY', 'outputZ']
     )
