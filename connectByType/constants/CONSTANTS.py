@@ -1,20 +1,23 @@
 typeDict = {
     'decomposeMatrix': (
-        'inputMatrix',
+        ['inputMatrix'],
         ['outputRotate', 'outputTranslate', 'outputScale']
     ),
 
     'transform': (
         ['rotate', 'translate', 'scale'],
-        'worldMatrix'
+        ['worldMatrix']
     ),
 
     'multMatrix': (
-        'matrixIn',
-        'matrixSum'
+        ['matrixIn'],
+        ['matrixSum']
     ),
 
-    'inverseMatrix': ('inputMatrix', 'outputMatrix'),
+    'inverseMatrix': (
+        ['inputMatrix'],
+        ['outputMatrix']
+    ),
 
     'multiplyDivide': (
         (

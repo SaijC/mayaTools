@@ -32,11 +32,22 @@ def getInputOutput(srcMobj, trgMobj):
     srcInputPlugs, srcOutputPlugs = CONST.typeDict[srcType]
     trgInputPlugs, trgOutputPlugs = CONST.typeDict[trgType]
     ioPlugsList = [srcInputPlugs, srcOutputPlugs, trgInputPlugs, trgOutputPlugs]
-
     print(ioPlugsList)
     return tuple(ioPlugsList)
 
+def getMPlugs(mFn, mPlugList):
+    if type(mPlugList) == list:
+        returnList = list()
 
+        for plug in mPlugList:
+            print(plug)
+            returnList.append(mFn.findPlug(plug, False))
+        return returnList
+    elif type(mPlugList) == tuple:
+        returnTuple = tuple()
+        for inputList in mPlugList:
+            returnTuple += [mFn.findPlug(mPlug, False) for mPlug in inputList]
+        return returnTuple
 def connectSRT(srcMobjHandle, trgMobjHandle):
     """
     Connect Scale, Rotate and Translate
@@ -77,21 +88,27 @@ def connectNodes(srcMobjHandle, trgMobjHandle):
     srcMFn = om2.MFnDependencyNode(srcMobj)
     trgMFn = om2.MFnDependencyNode(trgMobj)
 
-    srcInputPlugs, srcOutputPlugs, trgInputPlugs, trgOutputPlugs = getInputOutput(srcMobj, trgMobj)
-    srcPlug = srcMFn.findPlug(srcOutputPlugs, False)
-    trgPlug = trgMFn.findPlug(trgInputPlugs, False)
+    srcInputPlugList, srcOutputPlugList, trgInputPlugList, trgOutputPlugList = getInputOutput(srcMobj, trgMobj)
+    srcInputPlugs = getMPlugs(srcMFn, srcInputPlugList)
+    srcOutputPlugs = getMPlugs(srcMFn, srcInputPlugList)
+    trgInputPlugs = getMPlugs(trgMFn, trgInputPlugList)
+    trgOutputPlugs = getMPlugs(trgMFn, trgOutputPlugList)
+    print(srcInputPlugs)
+    # srcPlug = srcMFn.findPlug(srcOutputPlugs, False)
+    # trgPlug = trgMFn.findPlug(trgInputPlugs, False)
 
-    if srcPlug.isArray and not trgMFn.hasAttribute("matrixIn"):
-        srcWorldMtxPlug = srcPlug.elementByLogicalIndex(0)
-        dgMod.connect(srcWorldMtxPlug, trgPlug)
-        print("connecting: {} to {}".format(srcWorldMtxPlug, trgPlug))
-    elif trgMFn.hasAttribute("matrixIn"):
-        srcWorldMtxPlug = srcPlug.elementByLogicalIndex(0)
-        trgMtxPlug = trgPlug.elementByLogicalIndex(0)
-        dgMod.connect(srcWorldMtxPlug, trgMtxPlug)
-        print("connecting: {} to {}".format(srcWorldMtxPlug, trgMtxPlug))
-    else:
-        dgMod.connect(srcPlug, trgPlug)
+
+    # if srcPlug.isArray and not trgMFn.hasAttribute("matrixIn"):
+    #     srcWorldMtxPlug = srcPlug.elementByLogicalIndex(0)
+    #     dgMod.connect(srcWorldMtxPlug, trgPlug)
+    #     print("connecting: {} to {}".format(srcWorldMtxPlug, trgPlug))
+    # elif trgMFn.hasAttribute("matrixIn"):
+    #     srcWorldMtxPlug = srcPlug.elementByLogicalIndex(0)
+    #     trgMtxPlug = trgPlug.elementByLogicalIndex(0)
+    #     dgMod.connect(srcWorldMtxPlug, trgMtxPlug)
+    #     print("connecting: {} to {}".format(srcWorldMtxPlug, trgMtxPlug))
+    # else:
+    #     dgMod.connect(srcPlug, trgPlug)
 
 
 selList = om2.MGlobal.getActiveSelectionList()
