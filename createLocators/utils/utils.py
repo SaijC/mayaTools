@@ -66,3 +66,49 @@ def createNode(nodeTypeName, nodeName, mDagMod):
     mDagMod.doIt()
 
     return nodeMObjHandle
+
+
+def geIDsAndTypes(selList):
+    """
+    Get selected component's ID/s
+    :param selList: MSelectionList
+    :return: list of int
+    """
+    __, id = selList.getComponent(0)
+    idList = om2.MFnSingleIndexedComponent(id)
+    idElement = idList.getElements()
+    selType = id.apiType()
+
+    return idElement, selType
+
+def createLocator(name, selType, mDagMod):
+    """
+    create a locator with vertexID in the name
+    :param componentID: str/int
+    :param selType: str
+    :param mDagMod: MDagModifier
+    :return: MObjectHandle
+    """
+    locLocalScale = 0.1
+    mDagPath = om2.MDagPath()
+    loc = mDagMod.createNode("locator")
+    newName = "{}_{}_LOC".format(selType, name)
+    mDagMod.renameNode(loc, newName)
+
+    locMObjHandle = om2.MObjectHandle(loc)
+    mDagMod.doIt()
+
+    dagPath = mDagPath.getAPathTo(loc)
+    shapeDagPath = dagPath.extendToShape()
+    shapeMObj = shapeDagPath.node()
+    shapeMFn = om2.MFnDependencyNode(shapeMObj)
+
+    shapeLocalScaleX = shapeMFn.findPlug("localScaleX", False)
+    shapeLocalScaleY = shapeMFn.findPlug("localScaleY", False)
+    shapeLocalScaleZ = shapeMFn.findPlug("localScaleZ", False)
+    shapeLocalScaleX.setFloat(locLocalScale)
+    shapeLocalScaleY.setFloat(locLocalScale)
+    shapeLocalScaleZ.setFloat(locLocalScale)
+
+    return locMObjHandle
+
