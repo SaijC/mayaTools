@@ -1,4 +1,4 @@
-import mayaTools.saveLoadCtrls.ui.saveLoadCtrl_UI as mainUI
+import mayaTools.saveLoadCtrls.ui.ui as mainUI
 
 
 if __name__ == '__main__':

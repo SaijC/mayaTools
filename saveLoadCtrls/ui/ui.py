@@ -3,7 +3,7 @@ from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 import maya.OpenMayaUI as omUi
 from mayaTools.saveLoadCtrls.constants import constants as CONST
-from mayaTools.saveLoadCtrls.core import saveLoadCtrls as core
+from mayaTools.saveLoadCtrls.core import core as core
 
 
 def maya_main_window():
