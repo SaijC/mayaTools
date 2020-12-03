@@ -3,7 +3,7 @@ from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 import maya.OpenMayaUI as omUi
 from mayaTools.saveLoadCtrls.constants import constants as CONST
-from mayaTools.createLocators.core import core as core
+from mayaTools.createLocatorsAt.core import core as core
 
 for mod in [CONST, core]:
     reload(mod)

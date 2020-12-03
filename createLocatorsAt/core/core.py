@@ -1,5 +1,5 @@
 import maya.api.OpenMaya as om2
-from createLocators.utils import utils
+from createLocatorsAt.utils import utils
 
 selList = om2.MGlobal.getActiveSelectionList()
 mObjs = [selList.getDependNode(idx) for idx in range(selList.length())]
