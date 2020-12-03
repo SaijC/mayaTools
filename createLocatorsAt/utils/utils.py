@@ -1,6 +1,10 @@
 import maya.api.OpenMaya as om2
 
-def setAtters(mObjectHandle, mtx, applyTrans=True, applyRot=True, applyScale=True):
+
+def setAtters(mObjectHandle, mtx,
+              applyTrans=True,
+              applyRot=True,
+              applyScale=True):
     """
     Sets translation/rotation
     :param mObjectHandle: MObjectHandle
@@ -14,47 +18,33 @@ def setAtters(mObjectHandle, mtx, applyTrans=True, applyRot=True, applyScale=Tru
 
         if applyTrans:
             trans = mTransMtx.translation(om2.MSpace.kWorld)
-            transX = mFn.findPlug("translateX", False)
-            transY = mFn.findPlug("translateY", False)
-            transZ = mFn.findPlug("translateZ", False)
+            transX = mFn.findPlug('translateX', False)
+            transY = mFn.findPlug('translateY', False)
+            transZ = mFn.findPlug('translateZ', False)
             transX.setFloat(trans.x)
             transY.setFloat(trans.y)
             transZ.setFloat(trans.z)
 
         if applyRot:
             rot = mTransMtx.rotation()
-            rotX = mFn.findPlug("rotateX", False)
-            rotY = mFn.findPlug("rotateY", False)
-            rotZ = mFn.findPlug("rotateZ", False)
+            rotX = mFn.findPlug('rotateX', False)
+            rotY = mFn.findPlug('rotateY', False)
+            rotZ = mFn.findPlug('rotateZ', False)
             rotX.setFloat(rot.x)
             rotY.setFloat(rot.y)
             rotZ.setFloat(rot.z)
 
         if applyScale:
             scl = mTransMtx.scale(om2.MSpace.kObject)
-            sclX = mFn.findPlug("scaleX", False)
-            sclY = mFn.findPlug("scaleY", False)
-            sclZ = mFn.findPlug("scaleZ", False)
+            sclX = mFn.findPlug('scaleX', False)
+            sclY = mFn.findPlug('scaleY', False)
+            sclZ = mFn.findPlug('scaleZ', False)
             sclX.setFloat(scl[0])
             sclY.setFloat(scl[1])
             sclZ.setFloat(scl[2])
 
 
-def findPlug(mObjectHandle, searchPlug):
-    """
-    Creates and names the created node
-    :param mObjectHandle: MObjectHandle
-    :param findPlug: str
-    :return: MPlug
-    """
-    if mObjectHandle.isValid():
-        mObj = mObjectHandle.object()
-        mFn = om2.MFnDependencyNode(mObj)
-        mPlugs = mFn.findPlug(searchPlug, False)
-        return mPlugs
-
-
-def createNode(nodeTypeName, nodeName, mDagMod):
+def createNode(mDagMod, nodeTypeName, nodeName=""):
     """
     Creates and names the created node
     :param nodeTypeName: str
@@ -63,7 +53,8 @@ def createNode(nodeTypeName, nodeName, mDagMod):
     :return: MObjectHandle
     """
     nodeMObj = mDagMod.createNode(nodeTypeName)
-    mDagMod.renameNode(nodeMObj, nodeName)
+    if nodeName:
+        mDagMod.renameNode(nodeMObj, nodeName)
     nodeMObjHandle = om2.MObjectHandle(nodeMObj)
     mDagMod.doIt()
 
@@ -94,8 +85,8 @@ def createLocator(name, selType, mDagMod):
     """
     locLocalScale = 0.1
     mDagPath = om2.MDagPath()
-    loc = mDagMod.createNode("locator")
-    newName = "{}_{}_LOC".format(selType, name)
+    loc = mDagMod.createNode('locator')
+    newName = '{}_{}_LOC'.format(selType, name)
     mDagMod.renameNode(loc, newName)
 
     locMObjHandle = om2.MObjectHandle(loc)
@@ -106,9 +97,10 @@ def createLocator(name, selType, mDagMod):
     shapeMObj = shapeDagPath.node()
     shapeMFn = om2.MFnDependencyNode(shapeMObj)
 
-    shapeLocalScaleX = shapeMFn.findPlug("localScaleX", False)
-    shapeLocalScaleY = shapeMFn.findPlug("localScaleY", False)
-    shapeLocalScaleZ = shapeMFn.findPlug("localScaleZ", False)
+    shapeLocalScaleX = shapeMFn.findPlug('localScaleX', False)
+    shapeLocalScaleY = shapeMFn.findPlug('localScaleY', False)
+    shapeLocalScaleZ = shapeMFn.findPlug('localScaleZ', False)
+
     shapeLocalScaleX.setFloat(locLocalScale)
     shapeLocalScaleY.setFloat(locLocalScale)
     shapeLocalScaleZ.setFloat(locLocalScale)
@@ -117,6 +109,12 @@ def createLocator(name, selType, mDagMod):
 
 
 def getMtx(mObjectHandle, mtxName):
+    """
+    Get given matrix
+    :param mObjectHandle: MObjectHandle
+    :param mtxName: str
+    :return: MMatrix
+    """
     if mObjectHandle.isValid():
         mObj = mObjectHandle.object()
         mFn = om2.MFnDependencyNode(mObj)
