@@ -1,6 +1,6 @@
 import maya.api.OpenMaya as om2
 
-def setAtters(mObjectHandle, mtx):
+def setAtters(mObjectHandle, mtx, applyTrans=True, applyRot=True, applyScale=True):
     """
     Sets translation/rotation
     :param mObjectHandle: MObjectHandle
@@ -12,30 +12,32 @@ def setAtters(mObjectHandle, mtx):
         mFn = om2.MFnDependencyNode(mObj)
         mTransMtx = om2.MTransformationMatrix(mtx)
 
-        trans = mTransMtx.translation(om2.MSpace.kWorld)
-        rot = mTransMtx.rotation()
-        scl = mTransMtx.scale(om2.MSpace.kObject)
+        if applyTrans:
+            trans = mTransMtx.translation(om2.MSpace.kWorld)
+            transX = mFn.findPlug("translateX", False)
+            transY = mFn.findPlug("translateY", False)
+            transZ = mFn.findPlug("translateZ", False)
+            transX.setFloat(trans.x)
+            transY.setFloat(trans.y)
+            transZ.setFloat(trans.z)
 
-        transX = mFn.findPlug("translateX", False)
-        transY = mFn.findPlug("translateY", False)
-        transZ = mFn.findPlug("translateZ", False)
-        transX.setFloat(trans.x)
-        transY.setFloat(trans.y)
-        transZ.setFloat(trans.z)
+        if applyRot:
+            rot = mTransMtx.rotation()
+            rotX = mFn.findPlug("rotateX", False)
+            rotY = mFn.findPlug("rotateY", False)
+            rotZ = mFn.findPlug("rotateZ", False)
+            rotX.setFloat(rot.x)
+            rotY.setFloat(rot.y)
+            rotZ.setFloat(rot.z)
 
-        rotX = mFn.findPlug("rotateX", False)
-        rotY = mFn.findPlug("rotateY", False)
-        rotZ = mFn.findPlug("rotateZ", False)
-        rotX.setFloat(rot.x)
-        rotY.setFloat(rot.y)
-        rotZ.setFloat(rot.z)
-
-        rotX = mFn.findPlug("scaleX", False)
-        rotY = mFn.findPlug("scaleY", False)
-        rotZ = mFn.findPlug("scaleZ", False)
-        rotX.setFloat(scl[0])
-        rotY.setFloat(scl[1])
-        rotZ.setFloat(scl[2])
+        if applyScale:
+            scl = mTransMtx.scale(om2.MSpace.kObject)
+            sclX = mFn.findPlug("scaleX", False)
+            sclY = mFn.findPlug("scaleY", False)
+            sclZ = mFn.findPlug("scaleZ", False)
+            sclX.setFloat(scl[0])
+            sclY.setFloat(scl[1])
+            sclZ.setFloat(scl[2])
 
 
 def findPlug(mObjectHandle, searchPlug):
@@ -68,7 +70,7 @@ def createNode(nodeTypeName, nodeName, mDagMod):
     return nodeMObjHandle
 
 
-def geIDsAndTypes(selList):
+def getIDsAndTypes(selList):
     """
     Get selected component's ID/s
     :param selList: MSelectionList
@@ -80,6 +82,7 @@ def geIDsAndTypes(selList):
     selType = id.apiType()
 
     return idElement, selType
+
 
 def createLocator(name, selType, mDagMod):
     """
@@ -112,3 +115,16 @@ def createLocator(name, selType, mDagMod):
 
     return locMObjHandle
 
+
+def getMtx(mObjectHandle, mtxName):
+    if mObjectHandle.isValid():
+        mObj = mObjectHandle.object()
+        mFn = om2.MFnDependencyNode(mObj)
+        mtxPlug = mFn.findPlug(mtxName, False)
+        if mtxPlug.isArray:
+            mtxPlug = mtxPlug.elementByLogicalIndex(0)
+        plugMObj = mtxPlug.asMObject()
+
+        mFnMtxData = om2.MFnMatrixData(plugMObj)
+        mtx = mFnMtxData.matrix()
+        return mtx
