@@ -3,22 +3,6 @@ from createLocatorsAt.utils import utils
 reload(utils)
 
 
-def createLocAtSelection(mObjs, mDagMod):
-    """
-    create locator at selection
-    :param mObjs: MObject
-    :param mDagMod: MDagModifier
-    :return: None
-    """
-    for mObj in mObjs:
-        mFn = om2.MFnDependencyNode(mObj)
-        locMObj = utils.createNode(mDagMod, 'locator', '{}_LOC'.format(mFn.name()))
-        locMObjHandle = om2.MObjectHandle(locMObj)
-
-        mMtx = utils.getMtx(locMObjHandle, 'worldMatrix')
-        utils.setAtters(locMObjHandle, mMtx)
-
-
 def createLocAtFace(selList, mDagMod):
     """
     Method to create a locator at face center and align it to it's normal

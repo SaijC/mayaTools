@@ -17,19 +17,23 @@ def setAtters(mObjectHandle, mtx,
         mTransMtx = om2.MTransformationMatrix(mtx)
 
         if applyTrans:
+            transRootMplug = mFn.findPlug('translate', False)
+            transX = transRootMplug.child(0)
+            transY = transRootMplug.child(1)
+            transZ = transRootMplug.child(2)
+
             trans = mTransMtx.translation(om2.MSpace.kWorld)
-            transX = mFn.findPlug('translateX', False)
-            transY = mFn.findPlug('translateY', False)
-            transZ = mFn.findPlug('translateZ', False)
             transX.setFloat(trans.x)
             transY.setFloat(trans.y)
             transZ.setFloat(trans.z)
 
         if applyRot:
+            rotRootMplug = mFn.findPlug('rotate', False)
+            rotX = rotRootMplug.child(0)
+            rotY = rotRootMplug.child(1)
+            rotZ = rotRootMplug.child(2)
+
             rot = mTransMtx.rotation()
-            rotX = mFn.findPlug('rotateX', False)
-            rotY = mFn.findPlug('rotateY', False)
-            rotZ = mFn.findPlug('rotateZ', False)
             rotX.setFloat(rot.x)
             rotY.setFloat(rot.y)
             rotZ.setFloat(rot.z)
