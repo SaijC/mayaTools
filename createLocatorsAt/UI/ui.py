@@ -2,12 +2,13 @@ from PySide2 import QtCore
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 import maya.OpenMayaUI as omUi
-from mayaTools.saveLoadCtrls.constants import constants as CONST
-from mayaTools.createLocatorsAt.core import createLocAtFace as core
 
-for mod in [CONST, core]:
-    reload(mod)
+import sys
+if not "C:\\tools\\mayaTools" in sys.path:
+    sys.path.append("C:\\tools\\mayaTools")
 
+import createLocatorsAt.core.createLocAtSelection as c_loc
+reload(c_loc)
 
 def maya_main_window():
     """
@@ -17,12 +18,11 @@ def maya_main_window():
     maya_main_ptr = omUi.MQtUtil.mainWindow()
     return wrapInstance(int(maya_main_ptr), QtWidgets.QWidget)
 
-
 class MainDialog(QtWidgets.QDialog):
     def __init__(self, parent=maya_main_window()):
         super(MainDialog, self).__init__(parent)
         self.setWindowTitle('Create Locators')
-        self.setMinimumSize(470, 115)
+
         self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
         self.create_widgets()
         self.create_layout()
@@ -34,89 +34,76 @@ class MainDialog(QtWidgets.QDialog):
         :return: None
         """
 
-        self.lineEdit = QtWidgets.QLineEdit('{}\\{}'.format(CONST.USERHOMEPATH, CONST.DEFAULTFILENAME))
-
         self.levelSpinBox = QtWidgets.QSpinBox()
         self.levelSpinBox.setValue(3)
 
-        self.levelSpinBoxLable = QtWidgets.QLabel('Set Levels')
+        self.trans_checkBox = QtWidgets.QCheckBox('Trans')
+        self.trans_checkBox.setChecked(True)
+        self.rot_checkBox = QtWidgets.QCheckBox('Rot')
+        self.rot_checkBox.setChecked(True)
+        self.scl_checkBox = QtWidgets.QCheckBox('Scl')
+        self.scl_checkBox.setChecked(True)
 
-        self.loadBuffers_checkBox = QtWidgets.QCheckBox('Load Buffers')
-        self.loadBuffers_checkBox.setChecked(True)
-
-        self.loadScale_checkBox = QtWidgets.QCheckBox('Load Scale')
-        self.loadScale_checkBox.setChecked(True)
-
-        self.path_btn = QtWidgets.QPushButton('...')
-        self.save_btn = QtWidgets.QPushButton('Save')
-        self.load_btn = QtWidgets.QPushButton('Load')
+        self.match_btn = QtWidgets.QPushButton('Match Locator')
+        self.create_btn = QtWidgets.QPushButton('Create Locator')
 
     def create_layout(self):
         """
         pyside2 create layout
         :return: None
         """
-        self.uiTopHBox = QtWidgets.QHBoxLayout()
-        self.uiTopHBox.addWidget(self.lineEdit)
-        self.uiTopHBox.addWidget(self.path_btn)
-
-        self.levelSpinBoxHBox = QtWidgets.QHBoxLayout()
-        self.levelSpinBoxHBox.addWidget(self.levelSpinBoxLable)
-        self.levelSpinBoxHBox.addWidget(self.levelSpinBox)
-        self.levelSpinBoxHBox.addStretch()
-
-        self.uiFormLayout = QtWidgets.QFormLayout()
-        self.uiFormLayout.addRow('Path: ', self.uiTopHBox)
-        self.uiFormLayout.addRow('', self.levelSpinBoxHBox)
-        self.uiFormLayout.addRow('', self.loadBuffers_checkBox)
-        self.uiFormLayout.addRow('', self.loadScale_checkBox)
+        self.check_hBoxLayout = QtWidgets.QHBoxLayout()
+        self.check_hBoxLayout.addStretch()
+        self.check_hBoxLayout.addWidget(self.trans_checkBox)
+        self.check_hBoxLayout.addWidget(self.rot_checkBox)
+        self.check_hBoxLayout.addWidget(self.scl_checkBox)
+        self.check_hBoxLayout.addStretch()
 
         # create button layout
-        self.btn_hBoxLayout = QtWidgets.QHBoxLayout()
-        self.btn_hBoxLayout.addStretch()
-        self.btn_hBoxLayout.addWidget(self.save_btn)
-        self.btn_hBoxLayout.addWidget(self.load_btn)
+        self.btn_vBoxLayout = QtWidgets.QVBoxLayout()
+        self.btn_vBoxLayout.addWidget(self.match_btn)
+        self.btn_vBoxLayout.addWidget(self.create_btn)
 
         # create and add to main layout
         self.main_vBoxLayout = QtWidgets.QVBoxLayout(self)
-        self.main_vBoxLayout.addLayout(self.uiFormLayout)
-        self.main_vBoxLayout.addLayout(self.btn_hBoxLayout)
+        self.main_vBoxLayout.addLayout(self.check_hBoxLayout)
+        self.main_vBoxLayout.addLayout(self.btn_vBoxLayout)
+
 
     def create_connections(self):
         """
         pyside2 create connections
         :return: None
         """
-        self.path_btn.clicked.connect(self.setfilePath)
-        self.save_btn.clicked.connect(self.saveCtrls)
-        self.load_btn.clicked.connect(self.loadCtrls)
+        self.match_btn.clicked.connect(self.match_Loc)
+        self.create_btn.clicked.connect(self.create_Loc)
 
-    def saveCtrls(self):
-        core.saveCtrlMtx(self.lineEdit.text(), self.levelSpinBox.value())
+    def create_Loc(self):
+        c_loc.createLocAtSelection()
 
-    def loadCtrls(self):
+    def match_Loc(self):
         """
         pyside2 connection instructions for load ctrl button
         :return: None
         """
         matchScl = False
         loadBuffers = False
-        if self.loadScale_checkBox.isChecked():
+        if self.rot_checkBox.isChecked():
             matchScl = True
 
-        if self.loadBuffers_checkBox.isChecked():
+        if self.trans_checkBox.isChecked():
             loadBuffers = True
 
-        core.loadCtrlMtx(self.lineEdit.text(), matchScl=matchScl, loadBuffers=loadBuffers)
+        c_loc.matchLoc(self.lineEdit.text(), matchScl=matchScl, loadBuffers=loadBuffers)
 
-    def setfilePath(self):
-        """
-        pyside2 connection instructions for setPath button
-        :return: None
-        """
-        file_path, self.selected_filter = QtWidgets.QFileDialog.getOpenFileName(self, "Select File",
-                                                                                CONST.USERHOMEPATH,
-                                                                                CONST.FILE_FILTERS,
-                                                                                CONST.SELECTED_FILTER)
-        if file_path:
-            self.lineEdit.setText(file_path)
+
+if __name__ == '__main__':
+
+    global open_import_dialog
+    try:
+        open_import_dialog.close()
+        open_import_dialog.deleteLater()
+    except:
+        pass
+    open_import_dialog = MainDialog()
+    open_import_dialog.show()

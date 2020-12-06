@@ -39,10 +39,12 @@ def setAtters(mObjectHandle, mtx,
             rotZ.setFloat(rot.z)
 
         if applyScale:
+            sclRootMplug = mFn.findPlug('scale', False)
+            sclX = sclRootMplug.child(0)
+            sclY = sclRootMplug.child(1)
+            sclZ = sclRootMplug.child(2)
+
             scl = mTransMtx.scale(om2.MSpace.kObject)
-            sclX = mFn.findPlug('scaleX', False)
-            sclY = mFn.findPlug('scaleY', False)
-            sclZ = mFn.findPlug('scaleZ', False)
             sclX.setFloat(scl[0])
             sclY.setFloat(scl[1])
             sclZ.setFloat(scl[2])
@@ -79,39 +81,6 @@ def getIDsAndTypes(selList):
     return idElement, selType
 
 
-def createLocator(name, selType, mDagMod):
-    """
-    create a locator with vertexID in the name
-    :param componentID: str/int
-    :param selType: str
-    :param mDagMod: MDagModifier
-    :return: MObjectHandle
-    """
-    locLocalScale = 0.1
-    mDagPath = om2.MDagPath()
-    loc = mDagMod.createNode('locator')
-    newName = '{}_{}_LOC'.format(selType, name)
-    mDagMod.renameNode(loc, newName)
-
-    locMObjHandle = om2.MObjectHandle(loc)
-    mDagMod.doIt()
-
-    dagPath = mDagPath.getAPathTo(loc)
-    shapeDagPath = dagPath.extendToShape()
-    shapeMObj = shapeDagPath.node()
-    shapeMFn = om2.MFnDependencyNode(shapeMObj)
-
-    shapeLocalScaleX = shapeMFn.findPlug('localScaleX', False)
-    shapeLocalScaleY = shapeMFn.findPlug('localScaleY', False)
-    shapeLocalScaleZ = shapeMFn.findPlug('localScaleZ', False)
-
-    shapeLocalScaleX.setFloat(locLocalScale)
-    shapeLocalScaleY.setFloat(locLocalScale)
-    shapeLocalScaleZ.setFloat(locLocalScale)
-
-    return locMObjHandle
-
-
 def getMtx(mObjectHandle, mtxName):
     """
     Get given matrix
@@ -123,10 +92,26 @@ def getMtx(mObjectHandle, mtxName):
         mObj = mObjectHandle.object()
         mFn = om2.MFnDependencyNode(mObj)
         mtxPlug = mFn.findPlug(mtxName, False)
+
         if mtxPlug.isArray:
             mtxPlug = mtxPlug.elementByLogicalIndex(0)
-        plugMObj = mtxPlug.asMObject()
 
+        plugMObj = mtxPlug.asMObject()
         mFnMtxData = om2.MFnMatrixData(plugMObj)
         mtx = mFnMtxData.matrix()
+
         return mtx
+
+def getMatchLocator(mObjHandle):
+    if mObjHandle.isValid():
+        locSelList = om2.MSelectionList()
+        mObj = mObjHandle.object()
+        mFn = om2.MFnDependencyNode(mObj)
+        objName = mFn.name()
+        locName = '{}_loc'.format(objName)
+
+        locSelList.add(locName)
+        locMobj = locSelList.getDependNode(0)
+        locMobjHandle = om2.MObjectHandle(locMobj)
+
+        return locMobjHandle
