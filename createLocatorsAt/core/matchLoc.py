@@ -1,20 +1,24 @@
 import maya.api.OpenMaya as om2
 from createLocatorsAt.utils import utils
+reload(utils)
 
-selList = om2.MGlobal.getActiveSelectionList()
-mObjs = [selList.getDependNode(idx) for idx in range(selList.length())]
+def matchLoc(applyTranslate, applyRotate, applyScale):
+    selList = om2.MGlobal.getActiveSelectionList()
+    mObjs = [selList.getDependNode(idx) for idx in range(selList.length())]
 
-for mObj in mObjs:
-    toBeMatchObj = mObj
-    toBeMatchObjMFn = om2.MFnDependencyNode(toBeMatchObj)
-    toBeMatchObjMobjHandle = om2.MObjectHandle(toBeMatchObj)
-    toBeMatchObjMtx = utils.getMtx(toBeMatchObjMobjHandle, 'worldMatrix')
-    toBeMatchObjParentInvMtx = utils.getMtx(toBeMatchObjMobjHandle, 'parentInverseMatrix')
+    for mObj in mObjs:
+        selObjMFn = om2.MFnDependencyNode(mObj)
+        selObjHandle = om2.MObjectHandle(mObj)
+        selObjWMtx = utils.getMtx(selObjHandle, 'worldMatrix')
+        selObjParentInvMtx = utils.getMtx(selObjHandle, 'parentInverseMatrix')
 
-    matchToObjHandle = utils.getMatchLocator(toBeMatchObjMobjHandle)
-    matchToObjMtx = utils.getMtx(matchToObjHandle)
+        matchObjHandle = utils.getMatchObject(selObjHandle)
+        matchObjMtx = utils.getMtx(matchObjHandle, 'worldMatrix')
+        matchObjParentInvMtx = utils.getMtx(matchObjHandle, 'parentInverseMatrix')
 
-    print('toBeMatchObjMtx:', toBeMatchObjMtx)
-    print('toBeMatchObjParentInvMtx:', toBeMatchObjParentInvMtx)
-    print('matchToObjMtx:', matchToObjMtx)
-
+        mtx = matchObjMtx * selObjParentInvMtx
+        if '_LOC' in selObjMFn.name():
+            mtx = selObjWMtx * matchObjParentInvMtx
+            utils.setAtters(matchObjHandle, mtx, applyTranslate, applyRotate, applyScale)
+        else:
+            utils.setAtters(selObjHandle, mtx, applyTranslate, applyRotate, applyScale)

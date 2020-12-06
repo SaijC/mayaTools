@@ -8,7 +8,9 @@ if not "C:\\tools\\mayaTools" in sys.path:
     sys.path.append("C:\\tools\\mayaTools")
 
 import createLocatorsAt.core.createLocAtSelection as c_loc
+import createLocatorsAt.core.matchLoc as match
 reload(c_loc)
+reload(match)
 
 def maya_main_window():
     """
@@ -86,15 +88,18 @@ class MainDialog(QtWidgets.QDialog):
         pyside2 connection instructions for load ctrl button
         :return: None
         """
-        matchScl = False
-        loadBuffers = False
-        if self.rot_checkBox.isChecked():
-            matchScl = True
+        applyTranslate = False
+        applyRotate = False
+        applyScale = False
 
         if self.trans_checkBox.isChecked():
-            loadBuffers = True
+            applyTranslate = True
+        if self.rot_checkBox.isChecked():
+            applyRotate = True
+        if self.scl_checkBox.isChecked():
+            applyScale = True
 
-        c_loc.matchLoc(self.lineEdit.text(), matchScl=matchScl, loadBuffers=loadBuffers)
+        match.matchLoc(applyTranslate, applyRotate, applyScale)
 
 
 if __name__ == '__main__':

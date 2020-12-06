@@ -12,9 +12,11 @@ def setAtters(mObjectHandle, mtx,
     :return: None
     """
     if mObjectHandle.isValid():
+
         mObj = mObjectHandle.object()
         mFn = om2.MFnDependencyNode(mObj)
         mTransMtx = om2.MTransformationMatrix(mtx)
+
 
         if applyTrans:
             transRootMplug = mFn.findPlug('translate', False)
@@ -37,7 +39,6 @@ def setAtters(mObjectHandle, mtx,
             rotX.setFloat(rot.x)
             rotY.setFloat(rot.y)
             rotZ.setFloat(rot.z)
-
         if applyScale:
             sclRootMplug = mFn.findPlug('scale', False)
             sclX = sclRootMplug.child(0)
@@ -102,16 +103,25 @@ def getMtx(mObjectHandle, mtxName):
 
         return mtx
 
-def getMatchLocator(mObjHandle):
+def getMatchObject(mObjHandle):
     if mObjHandle.isValid():
         locSelList = om2.MSelectionList()
         mObj = mObjHandle.object()
         mFn = om2.MFnDependencyNode(mObj)
         objName = mFn.name()
-        locName = '{}_loc'.format(objName)
-
-        locSelList.add(locName)
+        if '_LOC' in objName:
+            objName = objName.replace('_LOC', '')
+        else:
+            objName = '{}_LOC'.format(objName)
+        locSelList.add(objName)
         locMobj = locSelList.getDependNode(0)
-        locMobjHandle = om2.MObjectHandle(locMobj)
+        objMobjHandle = om2.MObjectHandle(locMobj)
 
-        return locMobjHandle
+        return objMobjHandle
+
+def getName(mObjHandle):
+    if mObjHandle.isValid():
+        mObj = mObjHandle.object()
+        mFn = om2.MFnDependencyNode(mObj)
+        objName = mFn.name()
+        return objName
