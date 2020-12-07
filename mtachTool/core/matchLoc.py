@@ -1,5 +1,5 @@
-from AL.maya2 import om2
-from saveLoadLocator.utils import utils as utils
+import maya.api.OpenMaya as om2
+from mtachTool.utils import utils as utils
 reload(utils)
 
 def mtachLocatorTransform(applyTranslate, applyRotate, applyScale):
@@ -21,8 +21,8 @@ def mtachLocatorTransform(applyTranslate, applyRotate, applyScale):
         if '_LOC' in selObjMFn.name():
             # use locators worldMatrix and match objects parent inv matrix
             mtx = selObjWMtx * matchObjParentInvMtx
-            utils.setSRTAttrs(matchObjHandle, mtx, applyTranslate, applyRotate, applyScale)
+            utils.setAtters(matchObjHandle, mtx, applyTranslate, applyRotate, applyScale)
         else:
             mtx = matchObjMtx * selObjParentInvMtx
-            utils.setSRTAttrs(selObjHandle, mtx, applyTranslate, applyRotate, applyScale)
+            utils.setAtters(selObjHandle, mtx, applyTranslate, applyRotate, applyScale)
 

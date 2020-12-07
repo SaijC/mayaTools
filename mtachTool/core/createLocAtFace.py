@@ -1,5 +1,5 @@
 import maya.api.OpenMaya as om2
-from createLocatorsAt.utils import utils
+from mtachTool.utils import utils
 reload(utils)
 
 

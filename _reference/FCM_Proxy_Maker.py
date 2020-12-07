@@ -224,7 +224,7 @@ def createProxySkin():
             # End Progress bar
             cmds.progressBar(progressControl, edit=True, endProgress=1)
 
-    # Delete UI Progress Window
+    # Delete ui Progress Window
     cmds.deleteUI('progressWindow')
 
 

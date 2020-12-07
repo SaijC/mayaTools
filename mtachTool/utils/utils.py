@@ -52,7 +52,7 @@ def setAtters(mObjectHandle, mtx,
             sclZ.setFloat(scl[2])
 
 
-def createNode(mDagMod, nodeTypeName, nodeName=""):
+def createNode(mDagMod, nodeTypeName, nodeName=''):
     """
     Creates and names the created node
     :param nodeTypeName: str
