@@ -1,8 +1,8 @@
-import maya.api.OpenMaya as om2
-from createLocatorsAt.utils import utils
+from AL.maya2 import om2
+from saveLoadLocator.utils import utils as utils
 reload(utils)
 
-def matchLoc(applyTranslate, applyRotate, applyScale):
+def mtachLocatorTransform(applyTranslate, applyRotate, applyScale):
     selList = om2.MGlobal.getActiveSelectionList()
     mObjs = [selList.getDependNode(idx) for idx in range(selList.length())]
 
@@ -16,9 +16,13 @@ def matchLoc(applyTranslate, applyRotate, applyScale):
         matchObjMtx = utils.getMtx(matchObjHandle, 'worldMatrix')
         matchObjParentInvMtx = utils.getMtx(matchObjHandle, 'parentInverseMatrix')
 
-        mtx = matchObjMtx * selObjParentInvMtx
+
+        # if locator is selected
         if '_LOC' in selObjMFn.name():
+            # use locators worldMatrix and match objects parent inv matrix
             mtx = selObjWMtx * matchObjParentInvMtx
-            utils.setAtters(matchObjHandle, mtx, applyTranslate, applyRotate, applyScale)
+            utils.setSRTAttrs(matchObjHandle, mtx, applyTranslate, applyRotate, applyScale)
         else:
-            utils.setAtters(selObjHandle, mtx, applyTranslate, applyRotate, applyScale)
+            mtx = matchObjMtx * selObjParentInvMtx
+            utils.setSRTAttrs(selObjHandle, mtx, applyTranslate, applyRotate, applyScale)
+

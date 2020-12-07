@@ -1,4 +1,5 @@
 import maya.api.OpenMaya as om2
+import maya.cmds as cmds
 
 
 def setAtters(mObjectHandle, mtx,
@@ -109,10 +110,18 @@ def getMatchObject(mObjHandle):
         mObj = mObjHandle.object()
         mFn = om2.MFnDependencyNode(mObj)
         objName = mFn.name()
+        # if locator selected then find the corresponding match obj
         if '_LOC' in objName:
             objName = objName.replace('_LOC', '')
+            # check if pasted in the name
+            if '__' in objName:
+                objName = objName.split('__')[-1]
         else:
             objName = '{}_LOC'.format(objName)
+            # check if pasted in the name
+            if cmds.objExists('pasted__{}'.format(objName)):
+                objName = 'pasted__{}'.format(objName)
+
         locSelList.add(objName)
         locMobj = locSelList.getDependNode(0)
         objMobjHandle = om2.MObjectHandle(locMobj)
